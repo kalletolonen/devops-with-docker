@@ -954,6 +954,58 @@ $ docker run yt-dlp https://www.youtube.com/watch?v=RqzGzwTY-6w
 If an image defines both, then the CMD is used to give default arguments to the entrypoint.
 ```
 
+## Docker volumes and ports
+
+```bash
+docker run -v "$(pwd):/mydir" yt-dlp https://www.youtube.com/watch?v=DptFY_MszQs
+```
+
+This will save the downloaded file to the spesified directory, ie. current working directory in this case. 
+
+### Exercise 1.9: Volumes
+
+In this exercise we won't create a new Dockerfile.
+
+Image devopsdockeruh/simple-web-service creates a timestamp every two seconds to /usr/src/app/text.log when it's not given a command. Start the container with a bind mount so that the logs are created into your filesystem.
+
+Submit the command you used to complete the exercise.
+
+```bash
+$ docker run -d -v ${PWD}/text.log:/usr/src/app/text.log devopsdockeruh/simple-web-service:ubuntu
+
+$ cat text.log
+2024-04-02 09:09:04 +0000 UTC
+2024-04-02 09:09:06 +0000 UTC
+2024-04-02 09:09:08 +0000 UTC
+2024-04-02 09:09:10 +0000 UTC
+2024-04-02 09:09:12 +0000 UTC
+Secret message is: 'You can find the source code here: https://github.com/docker-hy'
+2024-04-02 09:09:14 +0000 UTC
+```
+
+Exposing a port in Docker lingo means that Docker will listen to said port. Publishing the port means that Docker will map host ports to container ports, ie. it'll facilitate communication to and from the container.
+
+### Exercise 1.10: Ports open
+
+In this exercise, we won't create a new Dockerfile.
+
+The image devopsdockeruh/simple-web-service will start a web service in port 8080 when given the argument "server". In Exercise 1.8 you already did an image that can be used to run the web service without any argument.
+
+Use now the -p flag to access the contents with your browser. The output to your browser should be something like: { message: "You connected to the following path: ...
+
+Submit your used commands for this exercise.
+
+```bash
+$ docker run -d -p 9999:8080 devopsdockeruh/simple-web-servi
+ce:ubuntu server
+006d4aded0aaecf089b12a0b6bbf3315f9d749800f9f17670576b3445ca39249
+
+$ curl localhost:9999
+{"message":"You connected to the following path: /","path":"/"}
+````
+
+
+
 
 
 ## Sources
