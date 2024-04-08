@@ -1004,6 +1004,93 @@ $ curl localhost:9999
 {"message":"You connected to the following path: /","path":"/"}
 ````
 
+## Utilizing tools from the registry [3]
+
+(Repo link)[https://github.com/docker-hy/material-applications/tree/main/rails-example-project]
+
+The goal is to run a containerized app.
+
+```Dockerfile
+# We need ruby 3.1.0. I found this from Docker Hub
+FROM ruby:3.1.0
+
+EXPOSE 3000
+
+WORKDIR /usr/src/app
+
+# Install the correct bundler version
+RUN gem install bundler:2.3.3
+
+# Copy the files required for dependencies to be installed
+COPY Gemfile* ./
+
+# Install all dependencies
+RUN bundle install
+
+# Copy all of the source code
+COPY . .
+
+# We pick the production mode since we have no intention of developing the software inside the container.
+# Run database migrations by following instructions from README
+RUN rails db:migrate RAILS_ENV=production
+
+# Precompile assets by following instructions from README
+RUN rake assets:precompile
+
+# And finally the command to run the application
+CMD ["rails", "s", "-e", "production"]
+```
+
+We should be able to get the container up and running with:
+
+```bash
+docker build . -t rails-project && docker run -p 3000:3000 rails-project
+```
+
+We get an error message, that hints to us, that we might need to clone the project first, since a Gemfile is missing:
+
+```bash
+ => ERROR [5/8] RUN bundle install                                                                                                                                            1.2s 
+------
+ > [5/8] RUN bundle install:
+#0 1.169 Could not locate Gemfile
+------
+Dockerfile:15
+--------------------
+  13 |
+  14 |     # Install all dependencies
+  15 | >>> RUN bundle install
+  16 |
+  17 |     # Copy all of the source code
+--------------------
+ERROR: failed to solve: process "/bin/sh -c bundle install" did not complete successfully: exit code: 10
+```
+
+I cloned the repo to my local machine with:
+
+```bash
+git clone https://github.com/docker-hy/material-applications.git
+```
+
+And copied the Dockerfile to the root of the rails-example-project.
+
+```bash
+=> Booting Puma
+=> Rails 7.0.1 application starting in production
+=> Run `bin/rails server --help` for more startup options
+Puma starting in single mode...
+* Puma version: 5.6.1 (ruby 3.1.0-p0) ("Birdie's Version")
+*  Min threads: 5
+*  Max threads: 5
+*  Environment: production
+*          PID: 1
+* Listening on http://0.0.0.0:3000
+Use Ctrl-C to stop
+```
+
+That worked.
+
+
 
 
 
@@ -1011,3 +1098,4 @@ $ curl localhost:9999
 ## Sources
 [1](https://devopswithdocker.com/part-1/section-1/)
 [2](https://devopswithdocker.com/part-1/section-2)
+[3](https://devopswithdocker.com/part-1/section-6)
